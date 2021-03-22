@@ -38,8 +38,12 @@ done
 
 sample=$(basename $forward_fq)
 echo $sample
+samplename=${sample%%_1.fq.gz}
 
+# fastqc -o ../fastqc $forward_fq $reverse_fq
 
-fastqc -o ../fastqc $forward_fq $reverse_fq
+cutadapt -j 2 -a AGATCGGAAGAG -A AGATCGGAAGAG -o ../cutadapt/${samplename}_cuta_1.fq.gz -p ../cutadapt/${samplename}_cuta_2.fq.gz  $forward_fq $reverse_fq
 
-icutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -o ../cutadapt/SRR3225601_cuta_1.fq.gz -p ../cutadapt/SRR3225601_cuta_2.fq.gz  SRR3225601_1.fastq.gz SRR3225601_2.fastq.gz
+trimmomatic PE -phred33 ../cutadapt/${samplename}_cuta_1.fq.gz ../cutadapt/${samplename}_cuta_2.fq.gz  ../trim/${samplename}_trim_1.fq.gz ../trim/${samplename}_unpair_1.fq.gz  ../trim/${samplename}_trim_2.fq.gz ../trim/${samplename}_unpair_2.fq.gz LEADING:20 TRAILING:20 SLIDINGWINDOW:4:20 MINLEN:35
+
+fastqc -o -t 2 ../fastqc ../trim/${samplename}_trim_1.fq.gz ../trim/${samplename}_trim_2.fq.gz
